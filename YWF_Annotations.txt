@@ -1,0 +1,175 @@
+# @BEGIN clean_traffic_stop_data
+# @IN Urbana_Police_Traffic_Stop-since2012.csv
+
+[
+  { "op": "core/column-removal",
+    "description": "Remove column STEP INDICATOR",
+    "columnName": "STEP INDICATOR"},
+  {"op": "core/column-removal",
+    "description": "Remove column GEO CODE",
+    "columnName": "GEO CODE"},
+  { "op": "core/column-removal",
+    "description": "Remove column ANONYMOUS HOUSE NUMBER",
+    "columnName": "ANONYMOUS HOUSE NUMBER"},
+  {"op": "core/column-removal",
+    "description": "Remove column ADDRESS STREET",
+    "columnName": "ADDRESS STREET"},
+  { "op": "core/column-removal",
+    "description": "Remove column CROSS STREET",
+    "columnName": "CROSS STREET"},
+  { "op": "core/column-removal",
+    "description": "Remove column SEX DESCRIPTION",
+    "columnName": "SEX DESCRIPTION"},
+  {"op": "core/column-removal",
+    "description": "Remove column AGE AT CONTACT",
+    "columnName": "AGE AT CONTACT"},
+  {"op": "core/column-removal",
+    "description": "Remove column RESIDENCY CODE",
+    "columnName": "RESIDENCY CODE"},
+  {"op": "core/column-removal",
+    "description": "Remove column Zip Codes",
+    "columnName": "Zip Codes"},
+  {"op": "core/column-removal",
+    "description": "Remove column MAPPING ADDRESS",
+    "columnName": "MAPPING ADDRESS"},
+  {"op": "core/column-removal",
+    "description": "Remove column CONSENT OR DOG SNIFF SEARCH CONDUCTED",
+    "columnName": "CONSENT OR DOG SNIFF SEARCH CONDUCTED"},
+  {"op": "core/column-removal",
+    "description": "Remove column ANY CONTRABAND FOUND IN VEHICLE CONSENT OR CANINE SEARCH",
+    "columnName": "ANY CONTRABAND FOUND IN VEHICLE CONSENT OR CANINE SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column DRUG AMOUNT FOUND CANINE SEARCH",
+    "columnName": "DRUG AMOUNT FOUND CANINE SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column OTHER CONTRABAND FOUND CANINE SEARCH",
+    "columnName": "OTHER CONTRABAND FOUND CANINE SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column STOLEN PROPERTY FOUND CANINE SEARCH",
+    "columnName": "STOLEN PROPERTY FOUND CANINE SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column WEAPON FOUND CANINE SEARCH",
+    "columnName": "WEAPON FOUND CANINE SEARCH"},
+  { "op": "core/column-removal",
+    "description": "Remove column ALCOHOL FOUND CANINE SEARCH",
+    "columnName": "ALCOHOL FOUND CANINE SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column PARAPHRENALIA FOUND CANINE SEARCH",
+    "columnName": "PARAPHRENALIA FOUND CANINE SEARCH"},
+  { "op": "core/column-removal",
+    "description": "Remove column CANINE SEARCH CONDUCTED",
+    "columnName": "CANINE SEARCH CONDUCTED"},
+  {"op": "core/column-removal",
+    "description": "Remove column CANINE ALERTED",
+    "columnName": "CANINE ALERTED"},
+  { "op": "core/column-removal",
+    "description": "Remove column CANINE SNIFF PERFORMED",
+    "columnName": "CANINE SNIFF PERFORMED"},
+  {"op": "core/column-removal",
+    "description": "Remove column DRUG AMOUNT FOUND VEHICLE CONSENT SEARCH",
+    "columnName": "DRUG AMOUNT FOUND VEHICLE CONSENT SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column OTHER CONTRABAND FOUND VEHICLE CONSENT SEARCH",
+    "columnName": "OTHER CONTRABAND FOUND VEHICLE CONSENT SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column STOLEN PROPERTY FOUND VEHICLE CONSENT SEARCH",
+    "columnName": "STOLEN PROPERTY FOUND VEHICLE CONSENT SEARCH"},
+  { "op": "core/column-removal",
+    "description": "Remove column WEAPON FOUND VEHICLE CONSENT SEARCH",
+    "columnName": "WEAPON FOUND VEHICLE CONSENT SEARCH"},
+  { "op": "core/column-removal",
+    "description": "Remove column ALCOHOL FOUND VEHICLE CONSENT SEARCH",
+    "columnName": "ALCOHOL FOUND VEHICLE CONSENT SEARCH"},
+  {"op": "core/column-removal",
+    "description": "Remove column PARAPHRENALIA FOUND VEHICLE CONSENT SEARCH",
+    "columnName": "PARAPHRENALIA FOUND VEHICLE CONSENT SEARCH"},
+  { "op": "core/column-removal",
+    "description": "Remove column VEHICLE CONSENT SEARCH GRANTED",
+    "columnName": "VEHICLE CONSENT SEARCH GRANTED"},
+  { "op": "core/column-removal",
+    "description": "Remove column VEHICLE CONSENT SEARCH REQUESTED",
+    "columnName": "VEHICLE CONSENT SEARCH REQUESTED"},
+  {"op": "core/column-removal",
+    "description": "Remove column VEHICLE YEAR",
+    "columnName": "VEHICLE YEAR"},
+  {"op": "core/text-transform",
+    "description": "Text transform on cells in column DATE OF CONTACT using expression value.toDate()",
+    "engineConfig": {
+      "facets": [],
+      "mode": "row-based"},
+    "columnName": "DATE OF CONTACT",
+    "expression": "value.toDate()",
+    "onError": "keep-original",
+    "repeat": false,
+    "repeatCount": 10}
+]
+# @OUT Cleaned_Urbana_Police_Traffic_Stops.csv @AS trafficStops
+################################################################
+
+# @BEGIN delete_columns
+# @IN Urbana_Police_Traffic_Stop-since2012.csv  
+# @OUT Cleaned_Urbana_Police_Traffic_Stops.csv @AS trafficStops
+# @END delete_columns
+################################################################
+
+import pandas as pd
+import csv
+import numpy as np
+from pandas.api.types import is_numeric_dtype
+
+################################################################
+# @BEGIN append_crime_categories
+# @IN Cleaned_Urbana_Police_Traffic_Stops.csv @AS trafficStops
+# @IN sixteen_cat_crime.csv @AS sixteenCategories
+
+trafficStops=pd.read_csv("Cleaned_Urbana_Police_Traffic_Stops.csv")
+sixteenCategories=pd.read_csv("sixteen_cat_crime.csv")
+categoryHead=sixteenCategories.columns.values.tolist()
+
+for category in categoryHead:
+    trafficStops[category]=0
+
+# @OUT trafficStops_appended
+# @END append_crime_categories
+
+################################################################
+# @BEGIN convert_crimes_to_binary
+# @IN trafficStops_appended
+# @IN data cleaning/sixteen_cat_crime.csv @AS sixteenCategories
+
+CD = trafficStops["CRIME DESCRIPTION"]
+for i, c in enumerate(CD): 
+    if i%1000 == 0: 
+        print(str(i))
+    for d in sixteenCategories.columns:
+        col = sixteenCategories[d]
+        col = col[~pd.isnull(col)]
+        ind = np.where(col==c)[0]
+        if len(ind)>0: 
+            cdName = d
+            trafficStops[cdName][i]=1
+        else:
+            cdName = d
+            trafficStops[cdName][i]=0
+            
+# @OUT binary_trafficStops
+# @END convert_crimes_to_binary
+
+################################################################
+# @BEGIN merge_rows
+# @IN binary_trafficStops
+merged = (trafficStops.groupby(['DATE OF CONTACT','TIME OF CONTACT','INCIDENT NUMBER','RACE DESCRIPTION'], as_index=False)
+       .agg(lambda x: x.sum() if np.issubdtype(x.dtype, np.integer) else ','.join(x)))
+results=[]
+for category in categoryHead:
+    for position,value in enumerate(merged[category]):
+        if position%1000 == 0: 
+            print(str(position))
+        merged[category][position]=([x.strip() for x in value.split(',')])
+        merged[category][position] = max(merged[category][position])
+        
+# @OUT binary_trafficStops @AS final_cleaned_TrafficStops.csv
+merged.to_csv('final_cleaned_TrafficStops.csv', index=False)
+# @END merge_rows
+
+# @END clean_traffic_stop_data

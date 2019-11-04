@@ -1,0 +1,71 @@
+
+/* Start of top-level graph */
+digraph Workflow {
+rankdir=TB
+
+/* Title for graph */
+fontname=Helvetica; fontsize=18; labelloc=t
+label=clean_traffic_stop_data
+
+/* Start of double cluster for drawing box around nodes in workflow */
+subgraph cluster_workflow_box_outer { label=""; color=black; penwidth=2
+subgraph cluster_workflow_box_inner { label=""; penwidth=0
+
+/* Style for nodes representing atomic programs in workflow */
+node[shape=box style=filled fillcolor="#CCFFCC" peripheries=1 fontname=Helvetica]
+
+/* Nodes representing atomic programs in workflow */
+delete_columns
+append_crime_categories
+convert_crimes_to_binary
+merge_rows
+
+/* Style for nodes representing non-parameter data channels in workflow */
+node[shape=box style="rounded,filled" fillcolor="#FFFFCC" peripheries=1 fontname=Helvetica]
+
+/* Nodes for non-parameter data channels in workflow */
+trafficStops
+"Urbana_Police_Traffic_Stop-since2012.csv"
+trafficStops_appended
+binary_trafficStops
+
+/* Style for nodes representing parameter channels in workflow */
+node[shape=box style="rounded,filled" fillcolor="#FCFCFC" peripheries=1 fontname=Helvetica]
+
+/* Nodes representing parameter channels in workflow */
+
+/* Edges representing connections between programs and channels */
+delete_columns -> trafficStops
+"Urbana_Police_Traffic_Stop-since2012.csv" -> delete_columns
+append_crime_categories -> trafficStops_appended
+trafficStops -> append_crime_categories
+sixteenCategories -> append_crime_categories
+convert_crimes_to_binary -> binary_trafficStops
+trafficStops_appended -> convert_crimes_to_binary
+sixteenCategories -> convert_crimes_to_binary
+merge_rows -> "final_cleaned_TrafficStops.csv"
+binary_trafficStops -> merge_rows
+
+/* End of double cluster for drawing box around nodes in workflow */
+}}
+
+/* Style for nodes representing workflow input ports */
+node[shape=circle style="rounded,filled" fillcolor="#FFFFFF" peripheries=1 fontname=Helvetica width=0.2]
+
+/* Nodes representing workflow input ports */
+"Urbana_Police_Traffic_Stop-since2012.csv_input_port" [label=""]
+
+/* Style for nodes representing workflow output ports */
+node[shape=circle style="rounded,filled" fillcolor="#FFFFFF" peripheries=1 fontname=Helvetica width=0.2]
+
+/* Nodes representing workflow output ports */
+trafficStops_output_port [label=""]
+
+/* Edges from input ports to channels */
+"Urbana_Police_Traffic_Stop-since2012.csv_input_port" -> "Urbana_Police_Traffic_Stop-since2012.csv"
+
+/* Edges from channels to output ports */
+trafficStops -> trafficStops_output_port
+
+/* End of top-level graph */
+}
